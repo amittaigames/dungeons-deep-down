@@ -156,6 +156,7 @@ void parseCommand(char* cmd) {
 		char in[16];
 		printf("> ");
 		fgets(in, 16, stdin);
+		in[strlen(in) - 1] = '\0';
 		if (!strcmp(in, "y") || !strcmp(in, "yes")) {
 			Player_heal(p);
 		} else if (!strcmp(in, "n") || !strcmp(in, "no")) {
@@ -219,7 +220,7 @@ void parseCommand(char* cmd) {
 
 int main(int argc, char* argv[]) {
 	srand(time(NULL));
-	printf("Dungeons Deep Down v1.0\n\n");
+	printf("Dungeons Deep Down v1.0.1\n\n");
 
 	// Initialize the player and middle room
 	p = Player_new(GRID_SIZE / 2, GRID_SIZE / 2);
