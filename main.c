@@ -113,9 +113,9 @@ void parseCommand(char** cmd) {
 			movePlayer(p, GRID_SIZE, ndir, rooms);
 
 		if (rooms[p->y * GRID_SIZE + p->x]->mcount == 0) {
-			printf("You take the %d gold from the room\n", rooms[ploc]->gold);
-			p->gold += rooms[ploc]->gold;
-			rooms[ploc]->cleared = 1;
+			printf("You take the %d gold from the room\n", rooms[p->y * GRID_SIZE + p->x]->gold);
+			p->gold += rooms[p->y * GRID_SIZE + p->x]->gold;
+			rooms[p->y * GRID_SIZE + p->x]->cleared = 1;
 		}
 	}
 

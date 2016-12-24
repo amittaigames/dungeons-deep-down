@@ -13,8 +13,8 @@ Player*	Player_new(int x, int y) {
 	self->gold = 0;
 	self->health = 20;
 	self->max_health = 20;
-	self->power = 5;
-	self->defense = 5;
+	self->power = 4;
+	self->defense = 3;
 
 	self->heal_cost = 20;
 
@@ -78,7 +78,7 @@ void Player_level(Player* self) {
 		self->max_health += h;
 		self->health += h;
 		self->power += random_n(2, 5);
-		self->defense += random_n(1, 4);
+		self->defense += random_n(1, 3);
 
 		self->heal_cost += 5;
 		self->m_min_health += random_n(1, 4);
