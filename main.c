@@ -33,15 +33,6 @@ void printHelp() {
 	printf("\n");
 }
 
-// Get console input
-char* getInput(char* pre) {
-	printf("%s", pre);
-	char* buf = (char*)malloc(32);
-	fgets(buf, 32, stdin);
-	buf[strlen(buf) - 1] = '\0';
-	return buf;
-}
-
 // Print the stats of the monsters in the room
 void printMonsters(int loc) {
 	Room* room = rooms[loc];
@@ -80,22 +71,23 @@ void game_over(char* msg) {
 }
 
 // Parse the input from the console
-void parseCommand(char** cmd) {
+void parseCommand(char* cmd) {
 	int ploc = p->y * GRID_SIZE + p->x;
 
 	// INFO
-	if (!strcmp(cmd[0], "info")) {
+	if (!strcmp(cmd, "info")) {
 		printRoom(ploc);
 	}
 
 	// MONSTERS
-	else if (!strcmp(cmd[0], "monsters")) {
+	else if (!strcmp(cmd, "monsters")) {
 		printMonsters(ploc);
 	}
 
 	// MOVE
-	else if (!strcmp(cmd[0], "move")) {
-		char* dir = cmd[1];
+	else if (!strncmp(cmd, "move", 4)) {
+		char** args = str_split(cmd, ' ');
+		char* dir = args[1];
 		int ndir = -1;
 
 		if (!strcmp(dir, "north") || !strcmp(dir, "n"))
@@ -117,11 +109,16 @@ void parseCommand(char** cmd) {
 			p->gold += rooms[p->y * GRID_SIZE + p->x]->gold;
 			rooms[p->y * GRID_SIZE + p->x]->cleared = 1;
 		}
+
+		free(args[0]);
+		free(args[1]);
+		free(args);
 	}
 
 	// LOOK
-	else if (!strcmp(cmd[0], "look")) {
-		char* dir = cmd[1];
+	else if (!strncmp(cmd, "look", 4)) {
+		char** args = str_split(cmd, ' ');
+		char* dir = args[1];
 		int ndir = -1;
 
 		if (!strcmp(dir, "north") || !strcmp(dir, "n"))
@@ -137,10 +134,14 @@ void parseCommand(char** cmd) {
 
 		if (ndir != -1)
 			lookThatWay(p, GRID_SIZE, ndir, rooms);
+
+		free(args[0]);
+		free(args[1]);
+		free(args);
 	}
 
 	// PLAYER
-	else if (!strcmp(cmd[0], "player")) {
+	else if (!strcmp(cmd, "player")) {
 		printf("\n");
 		printf("== Player ==\n");
 		printf("Health: %d/%d\t\tPower: %d\n", p->health, p->max_health, p->power);
@@ -150,9 +151,11 @@ void parseCommand(char** cmd) {
 	}
 
 	// HEAL
-	else if (!strcmp(cmd[0], "heal")) {
+	else if (!strcmp(cmd, "heal")) {
 		printf("This will cost you %d gold. Continue? [y/n]\n", p->heal_cost);
-		char* in = getInput("> ");
+		char in[16];
+		printf("> ");
+		fgets(in, 16, stdin);
 		if (!strcmp(in, "y") || !strcmp(in, "yes")) {
 			Player_heal(p);
 		} else if (!strcmp(in, "n") || !strcmp(in, "no")) {
@@ -163,8 +166,11 @@ void parseCommand(char** cmd) {
 	}
 
 	// FIGHT
-	else if (!strcmp(cmd[0], "fight")) {
-		int mnum = atoi(cmd[1]);
+	else if (!strncmp(cmd, "fight", 5)) {
+		char** args = str_split(cmd, ' ');
+		if (!args[1])
+			goto clean;
+		int mnum = atoi(args[1]);
 		Monster* m = rooms[ploc]->monsters[mnum - 1];
 		if (m->alive) {
 			int won = Fight_begin(p, m);
@@ -188,15 +194,20 @@ void parseCommand(char** cmd) {
 		} else {
 			printf("You can't fight that, it's already dead!\n");
 		}
+
+		clean:
+		free(args[0]);
+		free(args[1]);
+		free(args);
 	}
 
 	// HELP
-	else if (!strcmp(cmd[0], "help")) {
+	else if (!strcmp(cmd, "help")) {
 		printHelp();
 	}
 
 	// EXIT
-	else if (!strcmp(cmd[0], "exit")) {
+	else if (!strcmp(cmd, "exit")) {
 		game_over("You quit the game");
 		playing = 0;
 	}
@@ -215,15 +226,16 @@ int main(int argc, char* argv[]) {
 	rooms[p->y * GRID_SIZE + p->x] = Room_new(1, 100, p);
 
 	// Game loop
-	char* cmd = "~";
 	while (playing) {
-		cmd = getInput("> ");
-		char** cmds = str_split(cmd, ' ');
-		parseCommand(cmds);
+		printf("> ");
+		char cmd[32];
+		fgets(cmd, 32, stdin);
+		cmd[strlen(cmd) - 1] = '\0';
+
+		parseCommand(cmd);
 	}
 
 	// Clean up
-	free(cmd);
 	free(p);
 	for (int i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
 		if (rooms[i]) {
