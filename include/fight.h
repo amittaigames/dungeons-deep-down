@@ -2,6 +2,7 @@
 #define FIGHT_H
 
 #include <stdio.h>
+#include <string.h>
 #include "player.h"
 #include "monster.h"
 

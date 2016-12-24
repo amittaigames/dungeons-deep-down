@@ -57,11 +57,11 @@ void Fight_turnP(FightI inst) {
 		if (opt == 2) {
 			printf("You have %d gold, and healing costs %d.\n",
 				inst.player->gold, inst.player->heal_cost);
-			printf("Continue? [y/n]\n");
+			printf("Continue? [y/n] > ");
 			char c[32];
 			fgets(c, 32, stdin);
-			int x = atoi(c);
-			if ((char)x == 'y') {
+			c[strlen(c) - 1] = '\0';
+			if (!strcmp(c, "yes") || !strcmp(c, "y")) {
 				if (inst.player->gold >= inst.player->heal_cost) {
 					Player_heal(inst.player);
 					goto finish_p;
@@ -69,7 +69,7 @@ void Fight_turnP(FightI inst) {
 					printf("You don't have enough gold!\n");
 					Fight_turnP(inst);
 				}
-			} else if ((char)x == 'n') {
+			} else if (!strcmp(c, "no") || !strcmp(c, "n")) {
 				printf("Let's be careful out there\n");
 				Fight_turnP(inst);
 			} else {
